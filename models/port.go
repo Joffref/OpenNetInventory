@@ -17,6 +17,7 @@ const (
 type Port struct {
 	ID       uuid.UUID        `json:"id"`
 	Name     string           `json:"name"`
+	State    string           `json:"state"`
 	IPaddr   net.IP           `json:"ip"`
 	MAC      net.HardwareAddr `json:"mac"`
 	Tags     int              `json:"tags"`

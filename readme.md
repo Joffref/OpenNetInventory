@@ -13,8 +13,6 @@ Large Scale inventory
 
 ## Link
 
-## Equipement
-
-## Operator 
+## Equipement 
 
 ## Cluster
