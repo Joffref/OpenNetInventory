@@ -7,5 +7,5 @@ import (
 )
 
 func GetStatus(c *gin.Context) {
-	c.JSON(http.StatusOK, {"status":"ok"})
+	c.JSON(http.StatusOK, gin.H{"status": "ok"})
 }
