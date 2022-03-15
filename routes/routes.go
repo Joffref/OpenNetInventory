@@ -2,7 +2,7 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/joffref/netrman/controllers"
+	"github.com/joffref/openNetInventory/controllers"
 )
 
 func SetupRouter() *gin.Engine {
@@ -13,7 +13,29 @@ func SetupRouter() *gin.Engine {
 		v1.GET("/status", controllers.GetStatus)
 		port := v1.Group("/port")
 		{
-			port.GET("/:id", controllers.GetPortById)
+			port.GET("/", controllers.Mock)
+			port.POST("/", controllers.Mock)
+
+			subport := v1.Group("/subport")
+			{
+				subport.GET("/", controllers.Mock)
+				subport.POST("/", controllers.Mock)
+			}
+		}
+		link := v1.Group("/link")
+		{
+			link.GET("/", controllers.Mock)
+			link.POST("/", controllers.Mock)
+		}
+		equipement := v1.Group("/equipement")
+		{
+			equipement.GET("/", controllers.Mock)
+			equipement.POST("/", controllers.Mock)
+		}
+		cluster := v1.Group("/cluster")
+		{
+			cluster.GET("/", controllers.Mock)
+			cluster.POST("/", controllers.Mock)
 		}
 	}
 

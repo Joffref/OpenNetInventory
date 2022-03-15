@@ -1,6 +1,6 @@
 package main
 
-import "github.com/joffref/netrman/routes"
+import "github.com/joffref/openNetInventory/routes"
 
 func main() {
 	router := routes.SetupRouter()

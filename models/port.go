@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"net"
 	"time"
 
@@ -39,4 +40,18 @@ type PortsCluster struct {
 	Ports     *Ports    `json:"ports"`
 	CreatedAt time.Time `json:"created"`
 	UpdatedAt time.Time `json:"updated"`
+}
+
+func (p Port) CheckVlanNumber() error {
+	if p.TagID.ID < 0 || p.TagID.ID > 4095 {
+		return errors.New("wrong vlan number")
+	}
+	return nil
+}
+
+func (p Port) CheckVXlanNumber() error {
+	if p.TagID.ID < 0 || p.TagID.ID > 16777215 {
+		return errors.New("wrong vxlan number")
+	}
+	return nil
 }

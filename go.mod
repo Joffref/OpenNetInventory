@@ -1,4 +1,4 @@
-module github.com/joffref/netrman
+module github.com/joffref/openNetInventory
 
 go 1.17
 
