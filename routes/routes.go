@@ -22,6 +22,23 @@ func SetupRouter() *gin.Engine {
 				subport.POST("/", controllers.Mock)
 			}
 		}
+		network := v1.Group("/network")
+		{
+			network.GET("/", controllers.GetAllNetworks)
+			network.POST("/", controllers.CreateNetwork)
+			network.PUT("/", controllers.UpdateNetwork)
+			network.DELETE("/", controllers.DeleteNetwork)
+			ip := network.Group("/ip")
+			{
+				ip.DELETE("/:ip", controllers.DeleteNetworkByIP)
+				ip.GET("/:ip", controllers.GetNetworkByIP)
+			}
+			id := network.Group("/id")
+			{
+				id.DELETE("/:id", controllers.DeleteNetworkByID)
+				id.GET("/:id", controllers.GetNetworkByID)
+			}
+		}
 		link := v1.Group("/link")
 		{
 			link.GET("/", controllers.Mock)
