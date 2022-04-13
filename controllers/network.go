@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/joffref/openNetInventory/db"
 	"github.com/joffref/openNetInventory/models"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -14,6 +15,7 @@ import (
 func CreateNetwork(c *gin.Context) {
 	var network models.Network
 	err := c.ShouldBindJSON(&network)
+	network.ID = uuid.New().String()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -24,8 +26,9 @@ func CreateNetwork(c *gin.Context) {
 	session := driver.NewSession(neo4j.SessionConfig{})
 	defer session.Close()
 	records, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		result, err := tx.Run("CREATE (n:Network {network_address: $network_address, mask: $mask, protocol: $protocol, gateway: $gateway,  tag_id: $tag_id}) RETURN n",
+		result, err := tx.Run("CREATE (n:Network {id: $id, network_address: $network_address, mask: $mask, protocol: $protocol, gateway: $gateway,  tag_id: $tag_id}) RETURN n",
 			map[string]interface{}{
+				"id":              network.ID,
 				"network_address": network.NetAddr.String(),
 				"mask":            network.Mask.String(),
 				"protocol":        network.Protocol,
@@ -58,7 +61,7 @@ func GetAllNetworks(c *gin.Context) {
 		for result.Next() {
 			record := result.Record()
 			network := models.Network{}
-			network.ID = record.Values[0].(neo4j.Node).Labels[0]
+			network.ID = record.Values[0].(neo4j.Node).Props["id"].(string)
 			network.NetAddr = net.ParseIP(record.Values[0].(neo4j.Node).Props["network_address"].(string))
 			network.Mask = net.ParseIP(record.Values[0].(neo4j.Node).Props["mask"].(string))
 			network.Protocol = record.Values[0].(neo4j.Node).Props["protocol"].(string)
@@ -91,7 +94,7 @@ func GetNetworkByID(c *gin.Context) {
 		}
 		for result.Next() {
 			record := result.Record()
-			network.ID = record.Values[0].(neo4j.Node).Labels[0]
+			network.ID = record.Values[0].(neo4j.Node).Props["id"].(string)
 			network.NetAddr = net.ParseIP(record.Values[0].(neo4j.Node).Props["network_address"].(string))
 			network.Mask = net.ParseIP(record.Values[0].(neo4j.Node).Props["mask"].(string))
 			network.Protocol = record.Values[0].(neo4j.Node).Props["protocol"].(string)
@@ -123,7 +126,7 @@ func GetNetworkByIP(c *gin.Context) {
 		}
 		for result.Next() {
 			record := result.Record()
-			network.ID = record.Values[0].(neo4j.Node).Labels[0]
+			network.ID = record.Values[0].(neo4j.Node).Props["id"].(string)
 			network.NetAddr = net.ParseIP(record.Values[0].(neo4j.Node).Props["network_address"].(string))
 			network.Mask = net.ParseIP(record.Values[0].(neo4j.Node).Props["mask"].(string))
 			network.Protocol = record.Values[0].(neo4j.Node).Props["protocol"].(string)
@@ -142,6 +145,10 @@ func GetNetworkByIP(c *gin.Context) {
 func UpdateNetwork(c *gin.Context) {
 	var network models.Network
 	err := c.ShouldBindJSON(&network)
+	if network.ID != "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Referencing by ID is not allowed"})
+		return
+	}
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
