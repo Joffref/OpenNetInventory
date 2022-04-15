@@ -185,7 +185,7 @@ func UpdateNetwork(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"network": records})
+	c.JSON(http.StatusOK, gin.H{"result": records})
 }
 
 func DeleteNetwork(c *gin.Context) {
@@ -213,7 +213,7 @@ func DeleteNetwork(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"network": records})
+	c.JSON(http.StatusOK, gin.H{"result": records})
 }
 
 func DeleteNetworkByID(c *gin.Context) {
@@ -236,7 +236,7 @@ func DeleteNetworkByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"network": records})
+	c.JSON(http.StatusOK, gin.H{"result": records})
 }
 
 func DeleteNetworkByIP(c *gin.Context) {
@@ -259,5 +259,5 @@ func DeleteNetworkByIP(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"network": records})
+	c.JSON(http.StatusOK, gin.H{"result": records})
 }
