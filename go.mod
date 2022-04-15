@@ -6,6 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/google/uuid v1.3.0
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.1
+	github.com/neo4j/neo4j-go-driver/v5 v5.0.0-preview
 )
 
 require (

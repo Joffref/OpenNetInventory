@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -26,7 +27,7 @@ func CreateNetwork(c *gin.Context) {
 	session := driver.NewSession(neo4j.SessionConfig{})
 	defer session.Close()
 	records, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		result, err := tx.Run("CREATE (n:Network {id: $id, network_address: $network_address, mask: $mask, protocol: $protocol, gateway: $gateway,  tag_id: $tag_id}) RETURN n",
+		result, err := tx.Run("CREATE (n:Network {id: $id, network_address: $network_address, mask: $mask, protocol: $protocol, gateway: $gateway,  tag_id: $tag_id, created_at: datetime(), updated_at: datetime()}) RETURN n",
 			map[string]interface{}{
 				"id":              network.ID,
 				"network_address": network.NetAddr.String(),
@@ -67,6 +68,10 @@ func GetAllNetworks(c *gin.Context) {
 			network.Protocol = record.Values[0].(neo4j.Node).Props["protocol"].(string)
 			network.Gateway = net.ParseIP(record.Values[0].(neo4j.Node).Props["gateway"].(string))
 			network.Tag = int(record.Values[0].(neo4j.Node).Props["tag_id"].(int64))
+			network.CreatedAt = time.Time(record.Values[0].(neo4j.Node).Props["created_at"].(time.Time)).Format(time.RFC3339)
+			network.UpdatedAt = time.Time(record.Values[0].(neo4j.Node).Props["updated_at"].(time.Time)).Format(time.RFC3339)
+			log.Println(network)
+			log.Println(network.CreatedAt)
 			networks = append(networks, network)
 		}
 		return result.Next(), nil
@@ -100,6 +105,8 @@ func GetNetworkByID(c *gin.Context) {
 			network.Protocol = record.Values[0].(neo4j.Node).Props["protocol"].(string)
 			network.Gateway = net.ParseIP(record.Values[0].(neo4j.Node).Props["gateway"].(string))
 			network.Tag = int(record.Values[0].(neo4j.Node).Props["tag_id"].(int64))
+			network.CreatedAt = time.Time(record.Values[0].(neo4j.Node).Props["created_at"].(time.Time)).Format(time.RFC3339)
+			network.UpdatedAt = time.Time(record.Values[0].(neo4j.Node).Props["updated_at"].(time.Time)).Format(time.RFC3339)
 		}
 		return result.Next(), nil
 	})
@@ -132,6 +139,8 @@ func GetNetworkByIP(c *gin.Context) {
 			network.Protocol = record.Values[0].(neo4j.Node).Props["protocol"].(string)
 			network.Gateway = net.ParseIP(record.Values[0].(neo4j.Node).Props["gateway"].(string))
 			network.Tag = int(record.Values[0].(neo4j.Node).Props["tag_id"].(int64))
+			network.CreatedAt = time.Time(record.Values[0].(neo4j.Node).Props["created_at"].(time.Time)).Format(time.RFC3339)
+			network.UpdatedAt = time.Time(record.Values[0].(neo4j.Node).Props["updated_at"].(time.Time)).Format(time.RFC3339)
 		}
 		return result.Next(), nil
 	})
@@ -145,12 +154,12 @@ func GetNetworkByIP(c *gin.Context) {
 func UpdateNetwork(c *gin.Context) {
 	var network models.Network
 	err := c.ShouldBindJSON(&network)
-	if network.ID != "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Referencing by ID is not allowed"})
-		return
-	}
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if network.ID != "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Referencing by ID is not allowed"})
 		return
 	}
 	driver := db.Connect()
@@ -158,7 +167,7 @@ func UpdateNetwork(c *gin.Context) {
 	session := driver.NewSession(neo4j.SessionConfig{})
 	defer session.Close()
 	records, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		result, err := tx.Run("MATCH (n:Network) WHERE n.id = $id SET n.network_address = $network_address, n.mask = $mask, n.protocol = $protocol, n.gateway = $gateway, n.tag_id = $tag_id RETURN n",
+		result, err := tx.Run("MATCH (n:Network) WHERE n.id = $id SET n.network_address = $network_address, n.mask = $mask, n.protocol = $protocol, n.gateway = $gateway, n.tag_id = $tag_id, n.updated_at = time() RETURN n",
 			map[string]interface{}{
 				"id":              network.ID,
 				"network_address": network.NetAddr.String(),
